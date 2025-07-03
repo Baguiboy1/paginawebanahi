@@ -5,7 +5,8 @@ backend:
 
 # Media files will be stored in the repo under Anahi contabilidad/assets/uploads
 media_folder: "Anahi contabilidad/assets/uploads"
-public_folder: "/assets/uploads"
+# CORRECCIÓN: Se quita la diagonal inicial para que la ruta sea relativa
+public_folder: "assets/uploads"
 
 # This is the collection for your blog posts
 collections:
