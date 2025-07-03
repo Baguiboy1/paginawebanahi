@@ -1,19 +1,19 @@
 # Backend configuration
 backend:
   name: git-gateway
-  branch: main # IMPORTANTE: Cambia a "master" si tu rama principal se llama así.
+  branch: main
 
-# Media files will be stored in the repo under assets/uploads
-media_folder: "assets/uploads"
+# Media files will be stored in the repo under Anahi contabilidad/assets/uploads
+media_folder: "Anahi contabilidad/assets/uploads"
 public_folder: "/assets/uploads"
 
 # This is the collection for your blog posts
 collections:
   - name: "blog" # Used in routes, e.g., /admin/collections/blog
     label: "Publicaciones del Blog" # Used in the UI
-    folder: "_posts" # The path to the folder where the documents are stored
+    folder: "Anahi contabilidad/_posts" # The path to the folder where the documents are stored
     create: true # Allow users to create new documents in this collection
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}" # Filename template, e.g., YYYY-MM-DD-title.md
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}" # Filename template, e.g., 2025-07-02-title.md
     fields: # The fields for each document, usually in front matter
       - {label: "Título", name: "title", widget: "string"}
       - {label: "Fecha de Publicación", name: "date", widget: "datetime"}
