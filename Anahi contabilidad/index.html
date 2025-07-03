@@ -120,8 +120,27 @@
             </div>
         </section>
 
+        <!-- Recent Blog Posts Section -->
+        <section id="recent-blog" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-secondary-dark">Últimas Noticias de Nuestro Blog</h2>
+                    <p class="text-gray-600 mt-2">Consejos y novedades para mantenerte siempre al día.</p>
+                </div>
+                <div id="recent-posts-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Los posts recientes se cargarán aquí -->
+                </div>
+                <div id="recent-loading-indicator" class="text-center py-10">
+                    <p class="text-gray-500">Cargando publicaciones...</p>
+                </div>
+                <div class="text-center mt-12">
+                    <a href="blog.html" class="bg-base hover:bg-secondary-dark text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">Ver todas las entradas</a>
+                </div>
+            </div>
+        </section>
+
         <!-- About Me Section -->
-        <section id="nosotros" class="py-20 bg-gray-50">
+        <section id="nosotros" class="py-20 bg-white">
             <div class="container mx-auto px-6 flex flex-col md:flex-row items-center">
                 <div class="md:w-1/2 mb-8 md:mb-0"><img src="https://i.imgur.com/IHDiadG.jpeg" alt="Foto profesional de Anahí Torres Zenteno" class="rounded-lg shadow-xl mx-auto w-full max-w-md h-auto object-cover"></div>
                 <div class="md:w-1/2 md:pl-12"><h2 class="text-3xl md:text-4xl font-bold text-secondary-dark mb-4">Contadora Pública Anahí Torres Zenteno</h2><p class="text-gray-600 mb-4 text-lg">Con un enfoque en la ética, la precisión y la atención personalizada, mi misión es ser tu aliada estratégica en el cumplimiento de tus obligaciones fiscales.</p><p class="text-gray-600 mb-4">Entiendo los desafíos que enfrentan los emprendedores y profesionales en México. Por eso, mi compromiso es ofrecerte soluciones claras y efectivas que te permitan enfocarte en lo que realmente importa: hacer crecer tu negocio.</p><ul class="space-y-2"><li class="flex items-center"><i data-feather="check-circle" class="w-5 h-5 text-base mr-2"></i>Compromiso y Confianza</li><li class="flex items-center"><i data-feather="check-circle" class="w-5 h-5 text-base mr-2"></i>Asesoría Personalizada</li><li class="flex items-center"><i data-feather="check-circle" class="w-5 h-5 text-base mr-2"></i>Actualización Constante</li></ul></div>
@@ -159,21 +178,92 @@
         // Mobile Menu Toggle
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
-
-        // Close mobile menu when a link is clicked
         const mobileMenuLinks = mobileMenu.querySelectorAll('a');
         mobileMenuLinks.forEach(link => {
             link.addEventListener('click', () => {
-                // Solo oculta si no es un enlace a otra página
                 if (link.getAttribute('href').startsWith('#')) {
                     mobileMenu.classList.add('hidden');
                 }
             });
         });
+
+        // --- SCRIPT PARA CARGAR POSTS RECIENTES ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const postsContainer = document.getElementById('recent-posts-container');
+            const loadingIndicator = document.getElementById('recent-loading-indicator');
+            const user = 'Baguiboy1';
+            const repo = 'paginawebanahi';
+            const path = 'Anahi%20contabilidad/_posts';
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${path}`);
+                if (!response.ok) throw new Error(`Error al obtener los posts: ${response.statusText}`);
+                const files = await response.json();
+
+                if (!Array.isArray(files) || files.length === 0) {
+                    loadingIndicator.innerHTML = '<p class="text-gray-500">Aún no hay publicaciones.</p>';
+                    return;
+                }
+
+                const postPromises = files
+                    .filter(file => file.type === 'file' && file.name.endsWith('.md'))
+                    .map(async (file) => {
+                        const postResponse = await fetch(file.download_url);
+                        const postContent = await postResponse.text();
+                        const { attributes } = parseFrontMatter(postContent);
+                        return { attributes, fileName: file.name };
+                    });
+
+                let posts = await Promise.all(postPromises);
+                posts.sort((a, b) => new Date(b.attributes.date) - new Date(a.attributes.date));
+                
+                // Mostrar solo los 3 más recientes
+                const recentPosts = posts.slice(0, 3);
+
+                recentPosts.forEach(post => {
+                    const postCard = createPostCard(post.attributes, post.fileName);
+                    postsContainer.appendChild(postCard);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar posts recientes:', error);
+                loadingIndicator.innerHTML = `<p class="text-red-500 font-semibold">No se pudieron cargar las publicaciones.</p>`;
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        });
+
+        function parseFrontMatter(content) {
+            const frontMatterRegex = /^---\s*([\s\S]*?)\s*---/;
+            const match = frontMatterRegex.exec(content);
+            const attributes = {};
+            if (match) {
+                const frontMatterBlock = match[1];
+                frontMatterBlock.split('\n').forEach(line => {
+                    const parts = line.split(':');
+                    if (parts.length >= 2) {
+                        const key = parts[0].trim();
+                        const value = parts.slice(1).join(':').trim().replace(/^['"]|['"]$/g, '');
+                        attributes[key] = value;
+                    }
+                });
+            }
+            return { attributes };
+        }
+
+        function createPostCard(post, fileName) {
+            const slug = fileName.replace('.md', '');
+            const postElement = document.createElement('div');
+            postElement.className = 'bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col';
+            const imageUrl = post.thumbnail ? post.thumbnail : 'https://placehold.co/600x400/4B6F8B/FFFFFF?text=Blog';
+            const postDate = new Date(post.date);
+            const formattedDate = !isNaN(postDate) ? postDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Fecha no disponible';
+            postElement.innerHTML = `<a href="post.html?slug=${slug}"><img src="${imageUrl}" alt="Imagen para ${post.title}" class="w-full h-48 object-cover"></a><div class="p-6 flex flex-col flex-grow"><p class="text-sm text-gray-500 mb-2">${formattedDate}</p><h3 class="text-xl font-bold text-secondary-dark mb-3 flex-grow"><a href="post.html?slug=${slug}" class="hover:underline">${post.title || 'Post sin título'}</a></h3><a href="post.html?slug=${slug}" class="font-bold text-base hover:underline mt-4 self-start">Leer más &rarr;</a></div>`;
+            return postElement;
+        }
     </script>
 </body>
 </html>
