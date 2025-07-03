@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Anahí Torres Zenteno</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- Markdown-it library para convertir Markdown a HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.3.2/markdown-it.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+        :root {
+            --base-color: #2B526F;
+            --secondary-dark: #123652;
+            --secondary-light: #4B6F8B;
+        }
+        .bg-base { background-color: var(--base-color); }
+        .bg-secondary-dark { background-color: var(--secondary-dark); }
+        .text-base { color: var(--base-color); }
+        .text-secondary-dark { color: var(--secondary-dark); }
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <!-- Header y Navegación -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-3">
+                <img src="https://scontent.fmid1-4.fna.fbcdn.net/v/t39.30808-6/340287520_2074135029456405_8589434922702054647_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=VY0vEYc8Qj4Q7kNvwHk3Kp3&_nc_oc=AdmBF7968Oea7zkBwh58q5paG9M4scMePNs8IVSBD3keE8xomNyRvAMIfzSBVb2Kj9s&_nc_zt=23&_nc_ht=scontent.fmid1-4.fna&_nc_gid=lSpsLsKZqrAHEfRr-uAqdQ&oh=00_AfN3n5mbirABUaujATHuVgXLh4O0MG3a5-mCSgoq1duYcw&oe=686B9F98" alt="Logo Despacho Contable ATZ" class="h-12 w-12 rounded-full object-cover">
+                <span class="text-xl font-bold text-secondary-dark">Anahí Torres Zenteno</span>
+            </a>
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="index.html#servicios" class="text-gray-600 hover:text-base transition duration-300">Servicios</a>
+                <a href="index.html#nosotros" class="text-gray-600 hover:text-base transition duration-300">Sobre Mí</a>
+                <a href="blog.html" class="font-bold text-base transition duration-300">Blog</a>
+                <a href="index.html#contacto" class="bg-base hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg transition duration-300">Contáctame</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-20">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold text-secondary-dark">Blog y Noticias Fiscales</h1>
+                <p class="text-gray-600 mt-2">Mantente informado sobre las últimas novedades del mundo contable y fiscal.</p>
+            </div>
+            
+            <!-- Contenedor donde se cargarán los posts del blog -->
+            <div id="posts-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Los posts se insertarán aquí dinámicamente -->
+            </div>
+
+            <div id="loading-indicator" class="text-center py-10">
+                <p class="text-gray-500">Cargando publicaciones...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary-dark text-white">
+        <div class="container mx-auto px-6 py-6 text-center">
+            <p>&copy; <span id="year"></span> Anahí Torres Zenteno - Despacho Contable. Todos los derechos reservados.</p>
+            <p class="text-sm text-gray-400 mt-1">Diseño web por Uva creaciones</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const postsContainer = document.getElementById('posts-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+
+            try {
+                // 1. Obtener la lista de archivos del directorio _posts
+                // Usamos la API de GitHub para obtener el contenido del directorio
+                const response = await fetch('https://api.github.com/repos/Baguiboy1/paginawebanahi/_posts');
+                
+                if (!response.ok) {
+                    throw new Error(`Error al obtener los posts: ${response.statusText}`);
+                }
+
+                const files = await response.json();
+                
+                if (files.length === 0) {
+                    loadingIndicator.innerHTML = '<p class="text-gray-500">Aún no hay publicaciones en el blog.</p>';
+                    return;
+                }
+
+                // 2. Procesar cada archivo para obtener su contenido
+                for (const file of files) {
+                    if (file.type === 'file' && file.name.endsWith('.md')) {
+                        const postResponse = await fetch(file.download_url);
+                        const postContent = await postResponse.text();
+                        
+                        // 3. Extraer los datos (front matter) y el cuerpo del post
+                        const { attributes, body } = parseFrontMatter(postContent);
+
+                        // 4. Crear la tarjeta del post y añadirla al contenedor
+                        const postCard = createPostCard(attributes, file.name);
+                        postsContainer.appendChild(postCard);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error al cargar el blog:', error);
+                loadingIndicator.innerHTML = '<p class="text-red-500">No se pudieron cargar las publicaciones. Inténtalo de nuevo más tarde.</p>';
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        });
+
+        function parseFrontMatter(content) {
+            const frontMatterRegex = /^---\s*([\s\S]*?)\s*---/;
+            const match = frontMatterRegex.exec(content);
+            const attributes = {};
+            let body = content;
+
+            if (match) {
+                const frontMatterBlock = match[1];
+                body = content.substring(match[0].length);
+
+                frontMatterBlock.split('\n').forEach(line => {
+                    const parts = line.split(':');
+                    if (parts.length >= 2) {
+                        const key = parts[0].trim();
+                        const value = parts.slice(1).join(':').trim().replace(/^['"]|['"]$/g, ''); // Quita comillas
+                        attributes[key] = value;
+                    }
+                });
+            }
+            return { attributes, body };
+        }
+
+        function createPostCard(post, fileName) {
+            const slug = fileName.replace('.md', '');
+            const postElement = document.createElement('div');
+            postElement.className = 'bg-gray-50 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300';
+
+            const imageUrl = post.thumbnail ? post.thumbnail : 'https://placehold.co/600x400/4B6F8B/FFFFFF?text=Blog';
+            
+            // Formatear la fecha
+            const postDate = new Date(post.date);
+            const formattedDate = postDate.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            postElement.innerHTML = `
+                <a href="post.html?slug=${slug}">
+                    <img src="${imageUrl}" alt="Imagen para ${post.title}" class="w-full h-48 object-cover">
+                </a>
+                <div class="p-6">
+                    <p class="text-sm text-gray-500 mb-2">${formattedDate}</p>
+                    <h3 class="text-xl font-bold text-secondary-dark mb-3">
+                        <a href="post.html?slug=${slug}" class="hover:underline">${post.title}</a>
+                    </h3>
+                    <a href="post.html?slug=${slug}" class="font-bold text-base hover:underline">Leer más &rarr;</a>
+                </div>
+            `;
+            return postElement;
+        }
+
+        // Script para el año del footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+        feather.replace();
+    </script>
+</body>
+</html>
