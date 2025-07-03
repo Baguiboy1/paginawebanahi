@@ -3,21 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- El título se establecerá dinámicamente -->
     <title>Cargando post... - Anahí Torres Zenteno</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
-
-    <!-- Markdown-it library para convertir Markdown a HTML -->
     <script src="https://cdn.jsdelivr.net/npm/markdown-it@12.3.2/dist/markdown-it.min.js"></script>
 
     <style>
@@ -32,12 +24,7 @@
         .text-base { color: var(--base-color); }
         .text-secondary-dark { color: var(--secondary-dark); }
         html { scroll-behavior: smooth; }
-        /* Estilos para el contenido del post */
-        .post-content h1, .post-content h2, .post-content h3 {
-            font-weight: bold;
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-        }
+        .post-content h1, .post-content h2, .post-content h3 { font-weight: bold; margin-top: 1.5em; margin-bottom: 0.5em; color: var(--secondary-dark); }
         .post-content h1 { font-size: 2.25rem; }
         .post-content h2 { font-size: 1.875rem; }
         .post-content h3 { font-size: 1.5rem; }
@@ -45,13 +32,8 @@
         .post-content a { color: var(--base-color); text-decoration: underline; }
         .post-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
         .post-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
-        .post-content blockquote {
-            border-left: 4px solid var(--secondary-light);
-            padding-left: 1em;
-            margin-left: 0;
-            font-style: italic;
-            color: #4A5568;
-        }
+        .post-content blockquote { border-left: 4px solid var(--secondary-light); padding-left: 1em; margin-left: 0; font-style: italic; color: #4A5568; }
+        .post-content img { max-width: 100%; height: auto; border-radius: 0.5rem; margin-top: 1em; margin-bottom: 1em; }
     </style>
 </head>
 <body class="text-gray-700">
@@ -75,7 +57,6 @@
     <!-- Main Content -->
     <main class="py-20">
         <div class="container mx-auto px-6 max-w-4xl">
-            <!-- Contenedor para el post -->
             <article id="post-container">
                 <!-- El contenido del post se insertará aquí -->
             </article>
@@ -100,10 +81,12 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const postContainer = document.getElementById('post-container');
             const loadingIndicator = document.getElementById('loading-indicator');
-            const md = window.markdownit();
+            const user = 'Baguiboy1';
+            const repo = 'paginawebanahi';
+            const branch = 'main'; // O la rama que uses
+            const basePath = 'Anahi contabilidad/_posts';
 
             try {
-                // 1. Obtener el 'slug' del post desde la URL (ej. ?slug=2025-07-02-mi-post)
                 const params = new URLSearchParams(window.location.search);
                 const slug = params.get('slug');
 
@@ -111,28 +94,23 @@
                     throw new Error('No se encontró el slug del post en la URL.');
                 }
 
-                // 2. Construir la URL del archivo .md y obtenerlo
-                const postUrl = `_posts/${slug}.md`;
+                // CORRECCIÓN: Usamos la URL de 'raw' de GitHub para obtener el contenido del archivo directamente.
+                const postUrl = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${basePath}/${slug}.md`;
                 const response = await fetch(postUrl);
 
                 if (!response.ok) {
-                    throw new Error(`No se pudo encontrar el post en la ruta: ${postUrl}`);
+                    throw new Error(`No se pudo encontrar el post. Revisa la URL: ${postUrl}`);
                 }
 
                 const postContent = await response.text();
-
-                // 3. Parsear el contenido
                 const { attributes, body } = parseFrontMatter(postContent);
 
-                // 4. Actualizar el título de la página
-                document.title = `${attributes.title} - Anahí Torres Zenteno`;
-
-                // 5. Renderizar el contenido en la página
+                document.title = `${attributes.title || 'Post sin título'} - Anahí Torres Zenteno`;
                 renderPost(attributes, body);
 
             } catch (error) {
                 console.error('Error al cargar el post:', error);
-                postContainer.innerHTML = `<p class="text-red-500 text-center">Error: No se pudo cargar la publicación.</p>`;
+                postContainer.innerHTML = `<p class="text-red-500 text-center font-semibold">Error: No se pudo cargar la publicación.</p><p class="text-sm text-gray-600 text-center mt-2">${error.message}</p>`;
             } finally {
                 loadingIndicator.style.display = 'none';
             }
@@ -147,7 +125,6 @@
             if (match) {
                 const frontMatterBlock = match[1];
                 body = content.substring(match[0].length);
-
                 frontMatterBlock.split('\n').forEach(line => {
                     const parts = line.split(':');
                     if (parts.length >= 2) {
@@ -167,25 +144,20 @@
             const imageUrl = post.thumbnail ? `<img src="${post.thumbnail}" alt="Imagen para ${post.title}" class="w-full rounded-lg shadow-lg mb-8 max-h-96 object-cover">` : '';
             
             const postDate = new Date(post.date);
-            const formattedDate = postDate.toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            const formattedDate = !isNaN(postDate) ? postDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Fecha no disponible';
 
             postContainer.innerHTML = `
                 <div class="text-center mb-8">
-                    <h1 class="text-4xl md:text-5xl font-bold text-secondary-dark">${post.title}</h1>
+                    <h1 class="text-4xl md:text-5xl font-bold text-secondary-dark">${post.title || 'Post sin título'}</h1>
                     <p class="text-gray-500 mt-4">Publicado el ${formattedDate}</p>
                 </div>
                 ${imageUrl}
-                <div class="post-content text-lg text-gray-800">
+                <div class="post-content text-lg text-gray-800 leading-relaxed">
                     ${md.render(body)}
                 </div>
             `;
         }
-
-        // Script para el año del footer
+        
         document.getElementById('year').textContent = new Date().getFullYear();
         feather.replace();
     </script>
