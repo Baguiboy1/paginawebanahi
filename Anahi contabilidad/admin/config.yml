@@ -1,21 +1,21 @@
-# URL del backend de tu sitio
+# Backend configuration
 backend:
   name: git-gateway
-  branch: main # O 'master', dependiendo de tu rama principal en GitHub
+  branch: main # IMPORTANTE: Cambia a "master" si tu rama principal se llama así.
 
-# Dónde se subirán los archivos multimedia (imágenes del blog)
-media_folder: "assets/uploads" # La ruta donde se guardarán las imágenes
-public_folder: "/assets/uploads" # La ruta desde la cual se accederá a las imágenes
+# Media files will be stored in the repo under assets/uploads
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
 
-# Definición de las colecciones de contenido. En este caso, solo una: el blog.
+# This is the collection for your blog posts
 collections:
-  - name: "blog" # Nombre interno de la colección
-    label: "Publicaciones del Blog" # Nombre que verá el cliente en el panel
-    folder: "_posts" # Carpeta donde se guardarán los archivos de cada post
-    create: true # Permitir la creación de nuevos posts
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}" # Cómo se nombrará cada archivo (ej. 2025-07-02-mi-post.md)
-    fields: # Los campos que tendrá cada post
-      - { label: "Título", name: "title", widget: "string" }
-      - { label: "Fecha de Publicación", name: "date", widget: "datetime" }
-      - { label: "Imagen Destacada", name: "thumbnail", widget: "image", required: false }
-      - { label: "Cuerpo del Artículo", name: "body", widget: "markdown" }
+  - name: "blog" # Used in routes, e.g., /admin/collections/blog
+    label: "Publicaciones del Blog" # Used in the UI
+    folder: "_posts" # The path to the folder where the documents are stored
+    create: true # Allow users to create new documents in this collection
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}" # Filename template, e.g., YYYY-MM-DD-title.md
+    fields: # The fields for each document, usually in front matter
+      - {label: "Título", name: "title", widget: "string"}
+      - {label: "Fecha de Publicación", name: "date", widget: "datetime"}
+      - {label: "Imagen Destacada", name: "thumbnail", widget: "image", required: false}
+      - {label: "Cuerpo del Artículo", name: "body", widget: "markdown"}
