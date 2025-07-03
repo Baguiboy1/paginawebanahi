@@ -42,24 +42,39 @@
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
             <a href="index.html" class="flex items-center space-x-3">
-                <img src="https://scontent.fmid1-4.fna.fbcdn.net/v/t39.30808-6/340287520_2074135029456405_8589434922702054647_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=VY0vEYc8Qj4Q7kNvwHk3Kp3&_nc_oc=AdmBF7968Oea7zkBwh58q5paG9M4scMePNs8IVSBD3keE8xomNyRvAMIfzSBVb2Kj9s&_nc_zt=23&_nc_ht=scontent.fmid1-4.fna&_nc_gid=lSpsLsKZqrAHEfRr-uAqdQ&oh=00_AfN3n5mbirABUaujATHuVgXLh4O0MG3a5-mCSgoq1duYcw&oe=686B9F98" alt="Logo Despacho Contable ATZ" class="h-12 w-12 rounded-full object-cover">
+                <img src="https://scontent.fmid1-4.fna.fbcdn.net/v/t39.30808-6/340287520_2074135029456405_8589434922702054647_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=VY0vEYc8Qj4Q7kNvwHk3Kp3&_nc_oc=AdmBF7968Oea7zkBwh58q5paG9M4scMePNs8IVSBD3keE8xomNyRvAMIfzSBVb2Kj9s&nc_zt=23&_nc_ht=scontent.fmid1-4.fna&_nc_gid=lSpsLsKZqrAHEfRr-uAqdQ&oh=00_AfN3n5mbirABUaujATHuVgXLh4O0MG3a5-mCSgoq1duYcw&oe=686B9F98" alt="Logo Despacho Contable ATZ" class="h-12 w-12 rounded-full object-cover">
                 <span class="text-xl font-bold text-secondary-dark">Anahí Torres Zenteno</span>
             </a>
+            
+            <!-- Menú de Escritorio -->
             <div class="hidden md:flex space-x-6 items-center">
                 <a href="index.html#servicios" class="text-gray-600 hover:text-base transition duration-300">Servicios</a>
                 <a href="index.html#nosotros" class="text-gray-600 hover:text-base transition duration-300">Sobre Mí</a>
                 <a href="blog.html" class="font-bold text-base transition duration-300">Blog</a>
                 <a href="index.html#contacto" class="bg-base hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg transition duration-300">Contáctame</a>
             </div>
+
+            <!-- Botón de Menú Móvil -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 hover:text-base focus:outline-none">
+                    <i data-feather="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
         </nav>
+
+        <!-- Menú Móvil (oculto por defecto) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <a href="index.html#servicios" class="block py-3 px-6 text-gray-700 hover:bg-gray-100">Servicios</a>
+            <a href="index.html#nosotros" class="block py-3 px-6 text-gray-700 hover:bg-gray-100">Sobre Mí</a>
+            <a href="blog.html" class="block py-3 px-6 text-gray-700 hover:bg-gray-100">Blog</a>
+            <a href="index.html#contacto" class="block py-3 px-6 text-gray-700 hover:bg-gray-100">Contáctame</a>
+        </div>
     </header>
 
     <!-- Main Content -->
     <main class="py-20">
         <div class="container mx-auto px-6 max-w-4xl">
-            <article id="post-container">
-                <!-- El contenido del post se insertará aquí -->
-            </article>
+            <article id="post-container"></article>
             <div id="loading-indicator" class="text-center py-20">
                 <p class="text-gray-500">Cargando publicación...</p>
             </div>
@@ -83,31 +98,20 @@
             const loadingIndicator = document.getElementById('loading-indicator');
             const user = 'Baguiboy1';
             const repo = 'paginawebanahi';
-            const branch = 'main'; // O la rama que uses
-            const basePath = 'Anahi contabilidad/_posts';
+            const branch = 'main';
+            const basePath = 'Anahi%20contabilidad/_posts';
 
             try {
                 const params = new URLSearchParams(window.location.search);
                 const slug = params.get('slug');
-
-                if (!slug) {
-                    throw new Error('No se encontró el slug del post en la URL.');
-                }
-
-                // CORRECCIÓN: Usamos la URL de 'raw' de GitHub para obtener el contenido del archivo directamente.
+                if (!slug) throw new Error('No se encontró el slug del post en la URL.');
                 const postUrl = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${basePath}/${slug}.md`;
                 const response = await fetch(postUrl);
-
-                if (!response.ok) {
-                    throw new Error(`No se pudo encontrar el post. Revisa la URL: ${postUrl}`);
-                }
-
+                if (!response.ok) throw new Error(`No se pudo encontrar el post. Revisa la URL: ${postUrl}`);
                 const postContent = await response.text();
                 const { attributes, body } = parseFrontMatter(postContent);
-
                 document.title = `${attributes.title || 'Post sin título'} - Anahí Torres Zenteno`;
                 renderPost(attributes, body);
-
             } catch (error) {
                 console.error('Error al cargar el post:', error);
                 postContainer.innerHTML = `<p class="text-red-500 text-center font-semibold">Error: No se pudo cargar la publicación.</p><p class="text-sm text-gray-600 text-center mt-2">${error.message}</p>`;
@@ -121,7 +125,6 @@
             const match = frontMatterRegex.exec(content);
             const attributes = {};
             let body = content;
-
             if (match) {
                 const frontMatterBlock = match[1];
                 body = content.substring(match[0].length);
@@ -140,26 +143,22 @@
         function renderPost(post, body) {
             const postContainer = document.getElementById('post-container');
             const md = window.markdownit({ html: true, linkify: true, typographer: true });
-
+            // CORRECCIÓN: Se quita el "../" de la ruta de la imagen
             const imageUrl = post.thumbnail ? `<img src="${post.thumbnail}" alt="Imagen para ${post.title}" class="w-full rounded-lg shadow-lg mb-8 max-h-96 object-cover">` : '';
-            
             const postDate = new Date(post.date);
             const formattedDate = !isNaN(postDate) ? postDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Fecha no disponible';
-
-            postContainer.innerHTML = `
-                <div class="text-center mb-8">
-                    <h1 class="text-4xl md:text-5xl font-bold text-secondary-dark">${post.title || 'Post sin título'}</h1>
-                    <p class="text-gray-500 mt-4">Publicado el ${formattedDate}</p>
-                </div>
-                ${imageUrl}
-                <div class="post-content text-lg text-gray-800 leading-relaxed">
-                    ${md.render(body)}
-                </div>
-            `;
+            postContainer.innerHTML = `<div class="text-center mb-8"><h1 class="text-4xl md:text-5xl font-bold text-secondary-dark">${post.title || 'Post sin título'}</h1><p class="text-gray-500 mt-4">Publicado el ${formattedDate}</p></div>${imageUrl}<div class="post-content text-lg text-gray-800 leading-relaxed">${md.render(body)}</div>`;
         }
         
         document.getElementById('year').textContent = new Date().getFullYear();
         feather.replace();
+
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
     </script>
 </body>
 </html>
