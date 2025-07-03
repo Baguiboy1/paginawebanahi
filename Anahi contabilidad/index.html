@@ -9,7 +9,7 @@
     <meta name="description" content="Soluciones contables profesionales en Mérida, Yucatán. Facturación, contabilidad digital, impuestos y trámites ante el SAT.">
     <meta property="og:title" content="Anahí Torres Zenteno - Despacho Contable">
     <meta property="og:description" content="Soluciones contables profesionales en Mérida, Yucatán.">
-    <meta property="og:image" content="https://scontent.fmid1-4.fna.fbcdn.net/v/t39.30808-6/340287520_2074135029456405_8589434922702054647_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=VY0vEYc8Qj4Q7kNvwHk3Kp3&_nc_oc=AdmBF7968Oea7zkBwh58q5paG9M4scMePNs8IVSBD3keE8xomNyRvAMIfzSBVb2Kj9s&_nc_zt=23&_nc_ht=scontent.fmid1-4.fna&_nc_gid=lSpsLsKZqrAHEfRr-uAqdQ&oh=00_AfN3n5mbirABUaujATHuVgXLh4O0MG3a5-mCSgoq1duYcw&oe=686B9F98">
+    <meta property="og:image" content="https://scontent.fmid1-4.fna.fbcdn.net/v/t39.30808-6/340287520_2074135029456405_8589434922702054647_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=VY0vEYc8Qj4Q7kNvwHk3Kp3&_nc_oc=AdmBF7968Oea7zkBwh58q5paG9M4scMePNs8IVSBD3keE8xomNyRvAMIfzSBVb2Kj9s&nc_zt=23&_nc_ht=scontent.fmid1-4.fna&_nc_gid=lSpsLsKZqrAHEfRr-uAqdQ&oh=00_AfN3n5mbirABUaujATHuVgXLh4O0MG3a5-mCSgoq1duYcw&oe=686B9F98">
     <meta property="og:type" content="website">
 
     <!-- Tailwind CSS -->
@@ -57,16 +57,33 @@
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
             <a href="index.html" class="flex items-center space-x-3">
-                <img src="https://scontent.fmid1-4.fna.fbcdn.net/v/t39.30808-6/340287520_2074135029456405_8589434922702054647_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=VY0vEYc8Qj4Q7kNvwHk3Kp3&_nc_oc=AdmBF7968Oea7zkBwh58q5paG9M4scMePNs8IVSBD3keE8xomNyRvAMIfzSBVb2Kj9s&_nc_zt=23&_nc_ht=scontent.fmid1-4.fna&_nc_gid=lSpsLsKZqrAHEfRr-uAqdQ&oh=00_AfN3n5mbirABUaujATHuVgXLh4O0MG3a5-mCSgoq1duYcw&oe=686B9F98" alt="Logo Despacho Contable ATZ" class="h-12 w-12 rounded-full object-cover">
+                <img src="https://scontent.fmid1-4.fna.fbcdn.net/v/t39.30808-6/340287520_2074135029456405_8589434922702054647_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=VY0vEYc8Qj4Q7kNvwHk3Kp3&_nc_oc=AdmBF7968Oea7zkBwh58q5paG9M4scMePNs8IVSBD3keE8xomNyRvAMIfzSBVb2Kj9s&nc_zt=23&_nc_ht=scontent.fmid1-4.fna&_nc_gid=lSpsLsKZqrAHEfRr-uAqdQ&oh=00_AfN3n5mbirABUaujATHuVgXLh4O0MG3a5-mCSgoq1duYcw&oe=686B9F98" alt="Logo Despacho Contable ATZ" class="h-12 w-12 rounded-full object-cover">
                 <span class="text-xl font-bold text-secondary-dark">Anahí Torres Zenteno</span>
             </a>
+            
+            <!-- Menú de Escritorio -->
             <div class="hidden md:flex space-x-6 items-center">
                 <a href="#servicios" class="text-gray-600 hover:text-base transition duration-300">Servicios</a>
                 <a href="#nosotros" class="text-gray-600 hover:text-base transition duration-300">Sobre Mí</a>
                 <a href="blog.html" class="text-gray-600 hover:text-base transition duration-300">Blog</a>
                 <a href="#contacto" class="bg-base hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg transition duration-300">Contáctame</a>
             </div>
+
+            <!-- Botón de Menú Móvil -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 hover:text-base focus:outline-none">
+                    <i data-feather="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
         </nav>
+        
+        <!-- Menú Móvil (oculto por defecto) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <a href="#servicios" class="block py-3 px-6 text-gray-700 hover:bg-gray-100">Servicios</a>
+            <a href="#nosotros" class="block py-3 px-6 text-gray-700 hover:bg-gray-100">Sobre Mí</a>
+            <a href="blog.html" class="block py-3 px-6 text-gray-700 hover:bg-gray-100">Blog</a>
+            <a href="#contacto" class="block py-3 px-6 text-gray-700 hover:bg-gray-100">Contáctame</a>
+        </div>
     </header>
 
     <!-- Main Content -->
@@ -138,6 +155,25 @@
         feather.replace();
         // Automatically update the year in the footer
         document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when a link is clicked
+        const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+        mobileMenuLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                // Solo oculta si no es un enlace a otra página
+                if (link.getAttribute('href').startsWith('#')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
     </script>
 </body>
 </html>
