@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- El título se establecerá dinámicamente -->
+    <title>Cargando post... - Anahí Torres Zenteno</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- Markdown-it library para convertir Markdown a HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@12.3.2/dist/markdown-it.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+        :root {
+            --base-color: #2B526F;
+            --secondary-dark: #123652;
+            --secondary-light: #4B6F8B;
+        }
+        .bg-base { background-color: var(--base-color); }
+        .bg-secondary-dark { background-color: var(--secondary-dark); }
+        .text-base { color: var(--base-color); }
+        .text-secondary-dark { color: var(--secondary-dark); }
+        html { scroll-behavior: smooth; }
+        /* Estilos para el contenido del post */
+        .post-content h1, .post-content h2, .post-content h3 {
+            font-weight: bold;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .post-content h1 { font-size: 2.25rem; }
+        .post-content h2 { font-size: 1.875rem; }
+        .post-content h3 { font-size: 1.5rem; }
+        .post-content p { margin-bottom: 1em; line-height: 1.7; }
+        .post-content a { color: var(--base-color); text-decoration: underline; }
+        .post-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
+        .post-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
+        .post-content blockquote {
+            border-left: 4px solid var(--secondary-light);
+            padding-left: 1em;
+            margin-left: 0;
+            font-style: italic;
+            color: #4A5568;
+        }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <!-- Header y Navegación -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-3">
+                <img src="https://scontent.fmid1-4.fna.fbcdn.net/v/t39.30808-6/340287520_2074135029456405_8589434922702054647_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=VY0vEYc8Qj4Q7kNvwHk3Kp3&_nc_oc=AdmBF7968Oea7zkBwh58q5paG9M4scMePNs8IVSBD3keE8xomNyRvAMIfzSBVb2Kj9s&_nc_zt=23&_nc_ht=scontent.fmid1-4.fna&_nc_gid=lSpsLsKZqrAHEfRr-uAqdQ&oh=00_AfN3n5mbirABUaujATHuVgXLh4O0MG3a5-mCSgoq1duYcw&oe=686B9F98" alt="Logo Despacho Contable ATZ" class="h-12 w-12 rounded-full object-cover">
+                <span class="text-xl font-bold text-secondary-dark">Anahí Torres Zenteno</span>
+            </a>
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="index.html#servicios" class="text-gray-600 hover:text-base transition duration-300">Servicios</a>
+                <a href="index.html#nosotros" class="text-gray-600 hover:text-base transition duration-300">Sobre Mí</a>
+                <a href="blog.html" class="font-bold text-base transition duration-300">Blog</a>
+                <a href="index.html#contacto" class="bg-base hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg transition duration-300">Contáctame</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-20">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <!-- Contenedor para el post -->
+            <article id="post-container">
+                <!-- El contenido del post se insertará aquí -->
+            </article>
+            <div id="loading-indicator" class="text-center py-20">
+                <p class="text-gray-500">Cargando publicación...</p>
+            </div>
+             <div class="mt-12 text-center">
+                <a href="blog.html" class="text-base hover:underline">&larr; Volver al Blog</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary-dark text-white">
+        <div class="container mx-auto px-6 py-6 text-center">
+            <p>&copy; <span id="year"></span> Anahí Torres Zenteno - Despacho Contable. Todos los derechos reservados.</p>
+            <p class="text-sm text-gray-400 mt-1">Diseño web por Uva creaciones</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const postContainer = document.getElementById('post-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const md = window.markdownit();
+
+            try {
+                // 1. Obtener el 'slug' del post desde la URL (ej. ?slug=2025-07-02-mi-post)
+                const params = new URLSearchParams(window.location.search);
+                const slug = params.get('slug');
+
+                if (!slug) {
+                    throw new Error('No se encontró el slug del post en la URL.');
+                }
+
+                // 2. Construir la URL del archivo .md y obtenerlo
+                const postUrl = `_posts/${slug}.md`;
+                const response = await fetch(postUrl);
+
+                if (!response.ok) {
+                    throw new Error(`No se pudo encontrar el post en la ruta: ${postUrl}`);
+                }
+
+                const postContent = await response.text();
+
+                // 3. Parsear el contenido
+                const { attributes, body } = parseFrontMatter(postContent);
+
+                // 4. Actualizar el título de la página
+                document.title = `${attributes.title} - Anahí Torres Zenteno`;
+
+                // 5. Renderizar el contenido en la página
+                renderPost(attributes, body);
+
+            } catch (error) {
+                console.error('Error al cargar el post:', error);
+                postContainer.innerHTML = `<p class="text-red-500 text-center">Error: No se pudo cargar la publicación.</p>`;
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        });
+
+        function parseFrontMatter(content) {
+            const frontMatterRegex = /^---\s*([\s\S]*?)\s*---/;
+            const match = frontMatterRegex.exec(content);
+            const attributes = {};
+            let body = content;
+
+            if (match) {
+                const frontMatterBlock = match[1];
+                body = content.substring(match[0].length);
+
+                frontMatterBlock.split('\n').forEach(line => {
+                    const parts = line.split(':');
+                    if (parts.length >= 2) {
+                        const key = parts[0].trim();
+                        const value = parts.slice(1).join(':').trim().replace(/^['"]|['"]$/g, '');
+                        attributes[key] = value;
+                    }
+                });
+            }
+            return { attributes, body };
+        }
+
+        function renderPost(post, body) {
+            const postContainer = document.getElementById('post-container');
+            const md = window.markdownit({ html: true, linkify: true, typographer: true });
+
+            const imageUrl = post.thumbnail ? `<img src="${post.thumbnail}" alt="Imagen para ${post.title}" class="w-full rounded-lg shadow-lg mb-8 max-h-96 object-cover">` : '';
+            
+            const postDate = new Date(post.date);
+            const formattedDate = postDate.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            postContainer.innerHTML = `
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl md:text-5xl font-bold text-secondary-dark">${post.title}</h1>
+                    <p class="text-gray-500 mt-4">Publicado el ${formattedDate}</p>
+                </div>
+                ${imageUrl}
+                <div class="post-content text-lg text-gray-800">
+                    ${md.render(body)}
+                </div>
+            `;
+        }
+
+        // Script para el año del footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+        feather.replace();
+    </script>
+</body>
+</html>
