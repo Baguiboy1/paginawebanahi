@@ -16,9 +16,6 @@
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
 
-    <!-- Markdown-it library para convertir Markdown a HTML -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/12.3.2/markdown-it.min.js"></script>
-
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
         :root {
@@ -82,41 +79,51 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const postsContainer = document.getElementById('posts-container');
             const loadingIndicator = document.getElementById('loading-indicator');
+            const user = 'Baguiboy1';
+            const repo = 'paginawebanahi';
+            const path = 'Anahi contabilidad/_posts';
 
             try {
-                // 1. Obtener la lista de archivos del directorio _posts
-                // Usamos la API de GitHub para obtener el contenido del directorio
-                const response = await fetch('https://api.github.com/repos/Baguiboy1/paginawebanahi/_posts');
+                // CORRECCIÓN: Se añade la ruta completa, incluyendo la carpeta "Anahi contabilidad"
+                const response = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${path}`);
                 
                 if (!response.ok) {
+                    if (response.status === 404) {
+                         throw new Error(`La carpeta del blog no se encontró. Revisa la ruta en la API de GitHub. Ruta: ${path}`);
+                    }
                     throw new Error(`Error al obtener los posts: ${response.statusText}`);
                 }
 
                 const files = await response.json();
                 
-                if (files.length === 0) {
+                if (!Array.isArray(files) || files.length === 0) {
                     loadingIndicator.innerHTML = '<p class="text-gray-500">Aún no hay publicaciones en el blog.</p>';
                     return;
                 }
 
-                // 2. Procesar cada archivo para obtener su contenido
-                for (const file of files) {
-                    if (file.type === 'file' && file.name.endsWith('.md')) {
+                const postPromises = files
+                    .filter(file => file.type === 'file' && file.name.endsWith('.md'))
+                    .map(async (file) => {
                         const postResponse = await fetch(file.download_url);
                         const postContent = await postResponse.text();
-                        
-                        // 3. Extraer los datos (front matter) y el cuerpo del post
-                        const { attributes, body } = parseFrontMatter(postContent);
+                        const { attributes } = parseFrontMatter(postContent);
+                        return { attributes, fileName: file.name };
+                    });
 
-                        // 4. Crear la tarjeta del post y añadirla al contenedor
-                        const postCard = createPostCard(attributes, file.name);
-                        postsContainer.appendChild(postCard);
-                    }
-                }
+                const posts = await Promise.all(postPromises);
+
+                // Ordenar los posts por fecha, del más reciente al más antiguo
+                posts.sort((a, b) => new Date(b.attributes.date) - new Date(a.attributes.date));
+
+                // Crear y añadir las tarjetas al contenedor
+                posts.forEach(post => {
+                    const postCard = createPostCard(post.attributes, post.fileName);
+                    postsContainer.appendChild(postCard);
+                });
 
             } catch (error) {
                 console.error('Error al cargar el blog:', error);
-                loadingIndicator.innerHTML = '<p class="text-red-500">No se pudieron cargar las publicaciones. Inténtalo de nuevo más tarde.</p>';
+                loadingIndicator.innerHTML = `<p class="text-red-500 font-semibold">No se pudieron cargar las publicaciones.</p><p class="text-sm text-gray-600 mt-2">${error.message}</p>`;
             } finally {
                 loadingIndicator.style.display = 'none';
             }
@@ -126,55 +133,45 @@
             const frontMatterRegex = /^---\s*([\s\S]*?)\s*---/;
             const match = frontMatterRegex.exec(content);
             const attributes = {};
-            let body = content;
-
             if (match) {
                 const frontMatterBlock = match[1];
-                body = content.substring(match[0].length);
-
                 frontMatterBlock.split('\n').forEach(line => {
                     const parts = line.split(':');
                     if (parts.length >= 2) {
                         const key = parts[0].trim();
-                        const value = parts.slice(1).join(':').trim().replace(/^['"]|['"]$/g, ''); // Quita comillas
+                        const value = parts.slice(1).join(':').trim().replace(/^['"]|['"]$/g, '');
                         attributes[key] = value;
                     }
                 });
             }
-            return { attributes, body };
+            return { attributes };
         }
 
         function createPostCard(post, fileName) {
             const slug = fileName.replace('.md', '');
             const postElement = document.createElement('div');
-            postElement.className = 'bg-gray-50 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300';
+            postElement.className = 'bg-gray-50 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col';
 
             const imageUrl = post.thumbnail ? post.thumbnail : 'https://placehold.co/600x400/4B6F8B/FFFFFF?text=Blog';
             
-            // Formatear la fecha
             const postDate = new Date(post.date);
-            const formattedDate = postDate.toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            const formattedDate = !isNaN(postDate) ? postDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Fecha no disponible';
 
             postElement.innerHTML = `
                 <a href="post.html?slug=${slug}">
                     <img src="${imageUrl}" alt="Imagen para ${post.title}" class="w-full h-48 object-cover">
                 </a>
-                <div class="p-6">
+                <div class="p-6 flex flex-col flex-grow">
                     <p class="text-sm text-gray-500 mb-2">${formattedDate}</p>
-                    <h3 class="text-xl font-bold text-secondary-dark mb-3">
-                        <a href="post.html?slug=${slug}" class="hover:underline">${post.title}</a>
+                    <h3 class="text-xl font-bold text-secondary-dark mb-3 flex-grow">
+                        <a href="post.html?slug=${slug}" class="hover:underline">${post.title || 'Post sin título'}</a>
                     </h3>
-                    <a href="post.html?slug=${slug}" class="font-bold text-base hover:underline">Leer más &rarr;</a>
+                    <a href="post.html?slug=${slug}" class="font-bold text-base hover:underline mt-4 self-start">Leer más &rarr;</a>
                 </div>
             `;
             return postElement;
         }
 
-        // Script para el año del footer
         document.getElementById('year').textContent = new Date().getFullYear();
         feather.replace();
     </script>
